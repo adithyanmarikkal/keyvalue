@@ -19,8 +19,23 @@ CREATE TABLE IF NOT EXISTS tenants (
     room_number VARCHAR(20) NOT NULL,
     contact VARCHAR(15) NOT NULL,
     deposit DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    monthly_rent DECIMAL(10, 2) DEFAULT 0.00,
+    rent_status ENUM('Paid', 'Pending') DEFAULT 'Pending',
+    last_payment_date DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Complaints table
+CREATE TABLE IF NOT EXISTS complaints (
+    complaint_id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    room_number VARCHAR(20) NOT NULL,
+    issue_description TEXT NOT NULL,
+    status ENUM('Pending', 'Fixed') DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES tenants(tenant_id) ON DELETE CASCADE
 );
 
 -- Insert default admin user (password: admin123)

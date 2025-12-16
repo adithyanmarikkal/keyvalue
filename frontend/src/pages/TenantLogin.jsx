@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 
-function Login() {
-    const [credentials, setCredentials] = useState({ username: '', password: '' });
+function TenantLogin() {
+    const [contact, setContact] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -15,14 +14,17 @@ function Login() {
         setLoading(true);
 
         try {
-            const result = await login(credentials);
-            if (result.success) {
-                navigate('/dashboard');
+            const response = await authAPI.tenantLogin({ contact });
+            if (response.data.success) {
+                // Store tenant info in localStorage
+                localStorage.setItem('tenant', JSON.stringify(response.data.tenant));
+                localStorage.setItem('userType', 'tenant');
+                navigate('/tenant-dashboard');
             } else {
-                setError(result.message || 'Login failed');
+                setError(response.data.message || 'Login failed');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'An error occurred during login');
+            setError(err.response?.data?.message || 'No tenant found with this contact number');
         } finally {
             setLoading(false);
         }
@@ -34,47 +36,40 @@ function Login() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, hsl(250, 85%, 60%) 0%, hsl(280, 70%, 55%) 100%)',
+            background: 'linear-gradient(135deg, hsl(142, 76%, 45%) 0%, hsl(170, 70%, 50%) 100%)',
             padding: '2rem'
         }}>
             <div className="card fade-in" style={{ maxWidth: '450px', width: '100%' }}>
                 <div className="text-center mb-3">
                     <h1 style={{
-                        background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)',
+                        background: 'linear-gradient(135deg, hsl(142, 76%, 45%) 0%, hsl(170, 70%, 50%) 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
                         marginBottom: '0.5rem'
                     }}>
-                        PG Maintenance
+                        Tenant Portal
                     </h1>
-                    <p className="text-muted">Owner Admin Dashboard</p>
+                    <p className="text-muted">Login to view your dashboard</p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label className="form-label">Username</label>
+                        <label className="form-label">Contact Number</label>
                         <input
-                            type="text"
+                            type="tel"
                             className="form-input"
-                            placeholder="Enter your username"
-                            value={credentials.username}
-                            onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                            placeholder="Enter your registered contact number"
+                            value={contact}
+                            onChange={(e) => setContact(e.target.value)}
                             required
                             autoFocus
+                            pattern="[0-9]{10}"
+                            title="Please enter a 10-digit contact number"
                         />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Password</label>
-                        <input
-                            type="password"
-                            className="form-input"
-                            placeholder="Enter your password"
-                            value={credentials.password}
-                            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                            required
-                        />
+                        <p className="text-muted mt-1" style={{ fontSize: '0.875rem' }}>
+                            Enter the 10-digit contact number registered with the PG
+                        </p>
                     </div>
 
                     {error && (
@@ -90,28 +85,23 @@ function Login() {
 
                     <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="btn btn-success"
                         style={{ width: '100%' }}
                         disabled={loading}
                     >
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
 
-                    <div className="mt-3 text-center text-muted" style={{ fontSize: '0.875rem' }}>
-                        <p>Default credentials:</p>
-                        <p><strong>Username:</strong> admin | <strong>Password:</strong> admin123</p>
-                    </div>
-
                     <div className="mt-3 text-center">
                         <a
-                            href="/tenant-login"
+                            href="/"
                             style={{
-                                color: 'var(--success)',
+                                color: 'var(--text-secondary)',
                                 textDecoration: 'none',
-                                fontWeight: '600'
+                                fontSize: '0.875rem'
                             }}
                         >
-                            Tenant? Login here →
+                            ← Back to Owner Login
                         </a>
                     </div>
                 </form>
@@ -120,4 +110,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default TenantLogin;

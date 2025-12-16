@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { initializeDatabase, testConnection } from './config/db.js';
 import authRoutes from './routes/auth.js';
 import tenantRoutes from './routes/tenants.js';
+import complaintRoutes from './routes/complaints.js';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use(session({
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tenants', tenantRoutes);
+app.use('/api/complaints', complaintRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

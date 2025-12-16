@@ -101,4 +101,59 @@ router.get('/check', (req, res) => {
     }
 });
 
+// Tenant login endpoint
+router.post('/tenant-login', async (req, res) => {
+    try {
+        const { contact } = req.body;
+
+        if (!contact) {
+            return res.status(400).json({
+                success: false,
+                message: 'Contact number is required'
+            });
+        }
+
+        // Query database for tenant by contact
+        const [rows] = await db.query(
+            'SELECT * FROM tenants WHERE contact = ?',
+            [contact]
+        );
+
+        if (rows.length === 0) {
+            return res.status(401).json({
+                success: false,
+                message: 'No tenant found with this contact number'
+            });
+        }
+
+        const tenant = rows[0];
+
+        // Set session for tenant
+        req.session.tenantId = tenant.tenant_id;
+        req.session.tenantName = tenant.name;
+        req.session.roomNumber = tenant.room_number;
+        req.session.userType = 'tenant';
+
+        res.json({
+            success: true,
+            message: 'Login successful',
+            tenant: {
+                tenant_id: tenant.tenant_id,
+                name: tenant.name,
+                room_number: tenant.room_number,
+                contact: tenant.contact,
+                monthly_rent: tenant.monthly_rent,
+                rent_status: tenant.rent_status,
+                last_payment_date: tenant.last_payment_date
+            }
+        });
+    } catch (error) {
+        console.error('Tenant login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error during login'
+        });
+    }
+});
+
 export default router;

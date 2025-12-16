@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import TenantLogin from './pages/TenantLogin';
+import TenantDashboard from './pages/TenantDashboard';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -28,6 +30,8 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/tenant-login" element={<TenantLogin />} />
+          <Route path="/tenant-dashboard" element={<TenantDashboard />} />
           <Route
             path="/dashboard"
             element={
